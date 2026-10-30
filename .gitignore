@@ -3,3 +3,5 @@ kubeconfig
 
 d9ce3d1d-c633-4fff-acfc-cbb6547013b5.json
 age.agekey
+tls.crt
+tls.key
