@@ -1,29 +1,274 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  creationTimestamp: null
+  name: homepage
+spec: {}
+status: {}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: homepage
+  namespace: homepage
+  labels:
+    app.kubernetes.io/name: homepage
+secrets:
+  - name: homepage
+---
+apiVersion: v1
+kind: Secret
+type: kubernetes.io/service-account-token
+metadata:
+  name: homepage
+  namespace: homepage
+  labels:
+    app.kubernetes.io/name: homepage
+  annotations:
+    kubernetes.io/service-account.name: homepage
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homepage
+  namespace: homepage
+  labels:
+    app.kubernetes.io/name: homepage
+data:
+  kubernetes.yaml: |
+    mode: cluster 
+  settings.yaml: |
+    title: "Thoughtcrime Games" 
+    background: "https://i.ibb.co/gbzTJy4G/bruce-tang-n-KO-1-Qy-Fh9o-unsplash.jpg"
+  custom.css: ""
+  custom.js: ""
+  bookmarks.yaml: |
+    - Developer:
+      - Github:
+          - abbr: GH
+            href: https://github.com/gamefiend
+      - Terraform Registry:
+          - abbr: TF
+            href: https://registry.terraform.io 
+      - Leetcode:
+          - abbr: LC
+            href: https://leetcode.com
+      - Hackerrank:
+          - abbr: HR
+            href: https://hackerrank.com
+      - Hackernews:
+          - abbr: HN
+            href: https://news.ycombinator.com
+    - Productivity:
+        - Flow Club:
+            - abbr: FC
+              href: https://in.flow.club/upcoming
+        - Trello:
+            - abbr: TR
+              href: https://trello.com/u/quinnmurphy/boards
+        - Sunsama:
+            - abbr: SM
+              href: https://app.sunsama.com/
+        - Calendar:
+            - abbr: CAL
+              href: https://calendar.google.com/calendar/u/0/r
+    - Storage:
+        - Google Drive:
+            - abbr: GD
+              href: https://drive.google.com/drive/my-drive
+        - Dropbox:
+            - abbr: DB
+              href: https://www.dropbox.com/home
+    - Social & Community:
+        - Bluesky:
+            - abbr: BSKY
+              href: https://bsky.app/
+        - Kubecraft:
+            - abbr: KC
+              href: https://www.skool.com/kubecraft
+  services.yaml: |
+    - Gaming:
+        - FoundryVTT:
+            href: https://golarion.thoughtcrimegames.net
+            description: Pathfinder and other games 
+            namespace: foundry-vtt
+            app: foundry-vtt
+  widgets.yaml: |
+    - kubernetes:
+        cluster:
+          show: true
+          cpu: true
+          memory: true
+          showLabel: true
+          label: "cluster"
+        nodes:
+          show: true
+          cpu: true
+          memory: true
+          showLabel: true
+    - resources:
+        backend: resources
+        expanded: true
+        cpu: true
+        memory: true
+        network: default
+    - search:
+        provider: custom
+        target: _blank 
+        url: https://www.perplexity.ai/search?q=
+        showSearchSuggestions: false
+  docker.yaml: ""
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: homepage
+  labels:
+    app.kubernetes.io/name: homepage
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - namespaces
+      - pods
+      - nodes
+    verbs:
+      - get
+      - list
+  - apiGroups:
+      - extensions
+      - networking.k8s.io
+    resources:
+      - ingresses
+    verbs:
+      - get
+      - list
+  - apiGroups:
+      - traefik.io
+    resources:
+      - ingressroutes
+    verbs:
+      - get
+      - list
+  - apiGroups:
+      - gateway.networking.k8s.io
+    resources:
+      - httproutes
+      - gateways
+    verbs:
+      - get
+      - list
+  - apiGroups:
+      - metrics.k8s.io
+    resources:
+      - nodes
+      - pods
+    verbs:
+      - get
+      - list
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: homepage
+  labels:
+    app.kubernetes.io/name: homepage
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: homepage
+subjects:
+  - kind: ServiceAccount
+    name: homepage
+    namespace: homepage
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: homepage
+  namespace: homepage
+  labels:
+    app.kubernetes.io/name: homepage
+  annotations:
+spec:
+  type: ClusterIP
+  clusterIP: 10.245.96.191
+  ports:
+    - port: 3000
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: homepage
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: homepage
+  namespace: homepage
+  labels:
+    app.kubernetes.io/name: homepage
 spec:
+  revisionHistoryLimit: 3
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app.kubernetes.io/name: homepage
-
   template:
     metadata:
+      annotations:
+        restartTimeStamp: "{restart_timestamp}"
       labels:
         app.kubernetes.io/name: homepage
-
     spec:
+      serviceAccountName: homepage
+      automountServiceAccountToken: true
+      dnsPolicy: ClusterFirst
+      enableServiceLinks: true
       containers:
         - name: homepage
           image: "ghcr.io/gethomepage/homepage:latest"
-
-          envFrom:
-            - configMapRef:
-                name: homepage-configmap
-
+          imagePullPolicy: Always
+          env:
+            - name: HOMEPAGE_ALLOWED_HOSTS
+              value: "*"
           ports:
-            - containerPort: 3000
+            - name: http
+              containerPort: 3000
               protocol: TCP
-
-      restartPolicy: Always
+          volumeMounts:
+            - mountPath: /app/config/custom.js
+              name: homepage-config
+              subPath: custom.js
+            - mountPath: /app/config/custom.css
+              name: homepage-config
+              subPath: custom.css
+            - mountPath: /app/config/bookmarks.yaml
+              name: homepage-config
+              subPath: bookmarks.yaml
+            - mountPath: /app/config/docker.yaml
+              name: homepage-config
+              subPath: docker.yaml
+            - mountPath: /app/config/kubernetes.yaml
+              name: homepage-config
+              subPath: kubernetes.yaml
+            - mountPath: /app/config/services.yaml
+              name: homepage-config
+              subPath: services.yaml
+            - mountPath: /app/config/settings.yaml
+              name: homepage-config
+              subPath: settings.yaml
+            - mountPath: /app/config/widgets.yaml
+              name: homepage-config
+              subPath: widgets.yaml
+            - mountPath: /app/config/logs
+              name: logs
+      volumes:
+        - name: homepage-config
+          configMap:
+            name: homepage
+        - name: logs
+          emptyDir: {}
