@@ -6,7 +6,7 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: homepage
+      app.kubernetes.io/name: homepage
 
   template:
     metadata:
@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: homepage
-          image: ghcr.io/gethomepage/homepage:latest
+          image: ghcr.io/gethomepage/homepage:2.7
 
           envFrom:
             - configMapRef:
