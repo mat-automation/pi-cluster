@@ -38,7 +38,7 @@ spec:
               type: RuntimeDefault
           env:
             - name: HOMEPAGE_ALLOWED_HOSTS
-              value: "*:3000,hp.matlemke.online"
+              value: "*,dev"
           ports:
             - name: http
               containerPort: 3000
