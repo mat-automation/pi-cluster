@@ -37,12 +37,8 @@ spec:
             seccompProfile:
               type: RuntimeDefault
           env:
-            - name: MY_POD_IP
-              valueFrom:
-                fieldRef:
-                  fieldPath: status.podIP
             - name: HOMEPAGE_ALLOWED_HOSTS
-              value: "10.10.10.0:3000"
+              value: "*"
           ports:
             - name: http
               containerPort: 3000
