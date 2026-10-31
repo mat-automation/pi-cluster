@@ -11,7 +11,7 @@ spec:
   template:
     metadata:
       labels:
-        app: homepage
+        app.kubernetes.io/name: homepage
 
     spec:
       containers:

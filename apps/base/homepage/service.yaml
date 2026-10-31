@@ -6,5 +6,5 @@ spec:
   ports:
     - port: 3000
   selector:
-    app: homepage
+    app.kubernetes.io/name: homepage
   type: ClusterIP
