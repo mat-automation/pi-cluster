@@ -8,8 +8,9 @@ spec:
   chart:
     spec:
       chart: kube-prometheus-stack
-      version: "66.2.2"
+      version: "29.40.1"
 
+      # version: "66.2.2"
       # version: "58.x"
 
       sourceRef:
