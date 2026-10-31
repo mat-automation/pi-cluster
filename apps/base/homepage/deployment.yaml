@@ -42,7 +42,7 @@ spec:
                 fieldRef:
                   fieldPath: status.podIP
             - name: HOMEPAGE_ALLOWED_HOSTS
-              value: "10.10.10.105:3000,gethomepage.dev" # See gethomepage.dev/installation/#homepage_allowed_hosts . Value before the comma is required for the k8s probe
+              value: "*" # See gethomepage.dev/installation/#homepage_allowed_hosts . Value before the comma is required for the k8s probe
           ports:
             - name: http
               containerPort: 3000
