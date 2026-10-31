@@ -3,5 +3,10 @@ kind: Kustomization
 namespace: homepage
 resources:
   - namespace.yaml
-  - repository.yaml
-  - release.yaml
+  - serviceaccount.yaml
+  - secret.yaml          
+  - configmap.yaml       
+  - clusterrole.yaml
+  - service.yaml          
+  - deployment.yaml
+  - ingress.yaml
