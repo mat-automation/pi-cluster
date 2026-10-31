@@ -193,7 +193,7 @@ metadata:
   annotations:
 spec:
   type: ClusterIP
-  clusterIP: 10.245.96.191
+  clusterIP: 10.10.10.105
   ports:
     - port: 3000
       targetPort: http
