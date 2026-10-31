@@ -38,7 +38,7 @@ spec:
               type: RuntimeDefault
           env:
             - name: HOMEPAGE_ALLOWED_HOSTS
-              value: "*:3000,homepage.dev"
+              value: "localhost:3000,10.10.10.105:3000"
           ports:
             - name: http
               containerPort: 3000
