@@ -53,7 +53,7 @@ data:
         expanded: true
         cpu: true
         memory: true
-        network: default
+        network: homepage
     - search:
         provider: duckduckgo
         target: _blank
